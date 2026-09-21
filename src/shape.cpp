@@ -35,6 +35,8 @@ void calcColor(unsigned char* toFill,Autonoma* c, Ray ray, unsigned int depth){
    ShapeNode* t = c->listStart;
    double curTime = inf;
    Shape* curShape = NULL;
+
+   // just keep track of min the whole time so we dont have to insertion sort
    while(t!=NULL){
       double time = t->data->getIntersection(ray);
       if(time < curTime){
