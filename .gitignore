@@ -1,0 +1,9 @@
+*.exe
+*.o
+*.out
+perf.data
+perf.data.*
+output/*.ppm
+output/*.avi
+output/*.tmp.*
+src/*.obj
