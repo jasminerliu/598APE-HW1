@@ -20,6 +20,13 @@ To profile any run, you can do:
 `perf report`
 `perd report --stdio`
 
+For example:
+```bash
+perf stat -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+perf record -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+perf report
+```
+
 This program assumes the following are installed on your machine:
 * A working C++ compiler (g++ is assumed in the Makefile)
 * make
