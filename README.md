@@ -35,23 +35,22 @@ make clean && make all
 
 Our history has three checkpoint commits, each bundling one or more related optimizations. To isolate an individual optimization's effect, check out the commit before it changed, diff against the commit that introduced it (git diff [PARENT] [COMMIT] -- <file>), and re-benchmark before/after applying just that file's change.
 
-# After calcColor + Box::getIntersection fixes
+### After calcColor + Box::getIntersection fixes
 git checkout aef8813
 make clean && make all
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 
-# After solveScalers rewrite
+### After solveScalers rewrite
 git checkout db5249b
 make clean && make all
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 python3 scripts/verify_orthonormal.py   # re-check the correctness precondition this optimization relies on
 
-# After OpenMP parallelization + compiler flags
+### After OpenMP parallelization + compiler flags
 git checkout 62e31ef
 make clean && make all
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
-# To isolate the parallelization speedup specifically from the flag changes,
-# compare single-thread vs. default (all-core) runs at this same commit:
+### To isolate the parallelization speedup specifically from the flag changes, compare single-thread vs. default (all-core) runs at this same commit:
 OMP_NUM_THREADS=1 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500.
 
