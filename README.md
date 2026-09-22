@@ -47,7 +47,6 @@ make clean && make all
 git checkout db5249b
 make clean && make all
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
-python3 scripts/verify_orthonormal.py   # re-check the correctness precondition this optimization relies on
 ```
 
 ### After OpenMP parallelization + compiler flags
