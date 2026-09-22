@@ -2,7 +2,7 @@
 
 This repository contains code for homework 1 of 598APE.
 
-In particular, this repository is an implementation of a Raytracer.
+In particular, this repository is an implementation of a Raytracer, which we sped up.
 
 To compile the program run:
 ```bash
