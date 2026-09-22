@@ -71,7 +71,9 @@ OMP_NUM_THREADS=1 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.p
 
 Repeat the same sequence with `inputs/globe.ray`, `inputs/sphere.ray`, and `inputs/elephant.ray`. Commands are in the Input Programs section.
 
-This program assumes the following are installed on your machine:
+## Requirements to run
+
+This program assumes the following are installed on your machine (or you can use Docker, instructions at bottom):
 * A working C++ compiler (g++ is assumed in the Makefile)
 * make
 * ImageMagick (for importing and exporting non-ppm images)
