@@ -29,7 +29,7 @@ perf report
 To reproduce our baseline numbers, check out the last commit before our's in this repo's history, rebuild, and run:
 ```bash
 git checkout 19bbc813a55d19354196bf9887d3786adfe2f6c0
-make clean && make all
+make clean && make -j
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 ```
 
@@ -38,21 +38,21 @@ Our history has three checkpoint commits, each bundling one or more related opti
 ### After calcColor + Box::getIntersection fixes
 ```bash
 git checkout aef8813
-make clean && make all
+make clean && make -j
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 ```
 
 ### After solveScalers rewrite
 ```bash
 git checkout db5249b
-make clean && make all
+make clean && make -j
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 ```
 
 ### After OpenMP parallelization + compiler flags
 ```bash
 git checkout 62e31ef
-make clean && make all
+make clean && make -j
 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 ```
 ### To isolate the parallelization speedup specifically from the flag changes, compare single-thread vs. all core runs at this same commit:
