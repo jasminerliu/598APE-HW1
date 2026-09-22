@@ -26,6 +26,36 @@ perf stat -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H
 perf record -- ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
 perf report
 ```
+To reproduce our baseline numbers, check out the last commit before our's in this repo's history, rebuild, and run:
+```bash
+git checkout 19bbc813a55d19354196bf9887d3786adfe2f6c0
+make clean && make all
+./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+```
+
+Our history has three checkpoint commits, each bundling one or more related optimizations. To isolate an individual optimization's effect, check out the commit before it changed, diff against the commit that introduced it (git diff [PARENT] [COMMIT] -- <file>), and re-benchmark before/after applying just that file's change.
+
+# After calcColor + Box::getIntersection fixes
+git checkout aef8813
+make clean && make all
+./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+
+# After solveScalers rewrite
+git checkout db5249b
+make clean && make all
+./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+python3 scripts/verify_orthonormal.py   # re-check the correctness precondition this optimization relies on
+
+# After OpenMP parallelization + compiler flags
+git checkout 62e31ef
+make clean && make all
+./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+# To isolate the parallelization speedup specifically from the flag changes,
+# compare single-thread vs. default (all-core) runs at this same commit:
+OMP_NUM_THREADS=1 ./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500
+./main.exe -i inputs/pianoroom.ray --ppm -o output/pianoroom.ppm -H 500 -W 500.
+
+Repeat the same sequence with inputs/globe.ray, inputs/sphere.ray, and inputs/elephant.ray. Commands are in the Input Programs section.
 
 This program assumes the following are installed on your machine:
 * A working C++ compiler (g++ is assumed in the Makefile)
@@ -56,10 +86,6 @@ As we run the program, we see the following output:
 Done Frame       0|
 Total time to create images=1.334815 seconds
 ```
-
-We have placed timer code surrounding the main computational loop inside main.cpp. It is your goal to reduce this runtime as much as possible, while maintaining or increasing the complexity (i.e. resolution, number of frames) of the scene.
-
-Here we see that the image took 1.3 seconds to run and produced a result in `output/pianoroom.ppm`. Input and output of images is already handled by the library. In particular, the PPM format (see https://en.wikipedia.org/wiki/Netpbm for an example), represents images as text for data -- which makes it easy to input and output without the use of a library. However, as this is not the most efficient, this application uses the tool ImageMagick tool to convert to and from the PPM formats.
 
 ## Input Programs
 This project contains three (arguably four) input programs for you to optimize.
