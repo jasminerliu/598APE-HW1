@@ -14,11 +14,18 @@ To clean existing build artifacts run:
 make clean
 ```
 
+To profile any run, you can do:
+`perf stat <command>`
+`perf record <command>`
+`perf report`
+`perd report --stdio`
+
 This program assumes the following are installed on your machine:
 * A working C++ compiler (g++ is assumed in the Makefile)
 * make
 * ImageMagick (for importing and exporting non-ppm images)
 * FFMpeg (for exporting movies from image sequences)
+* perf (not required to build or run the raytracer, for profiling only)
 
 The raytracer program here is general and can be used to generate any number of different potential scenes.
 
@@ -96,7 +103,7 @@ If we inspect the input file `inputs/elephant.ray` we see that it loads the mesh
 data/x.txt 1586 data/f.txt 3168 -1.58 -.43 2.7
 ```
 
-The goal here is to speed up the program sufficiently to make a high resolution circle of the elephant mesh (found in `data/elepx.txt` and `data/elepf.txt`), which contains 111748 triangles. One can edit the `.ray` file and comment out the sphere mesh and replace it with `data/elepx.txt 62779 data/elepf.txt 111748 -1.58 -.43 2.7` (this is done in `inputs/realelephant.ray`).
+The goal here is to speed up the program sufficiently to make a high resolution circle of the elephant mesh (found in `data/elepx.txt` and `data/elepf.txt`), which contains 111748 triangles. One can edit the `.ray` file and comment out the sphere mesh and replace it with `data/elepx.txt 62779 data/elepf.txt 111748 -1.58 -.43 2.7`.
 
 ## Code Overview
 
@@ -136,6 +143,21 @@ An Autonoma is a base class used to hold all of the shapes in scope, the camera,
 
 For ease of use and installation, we provide a docker image capable of running and building code here. The source docker file is in /docker (which is essentially a list of commands to build an OS state from scratch). It contains the dependent compilers, and some other nice things.
 
-You can build this yourself manually by running `cd docker && docker build -t <myusername>/598ape`. Alternatively we have pushed a pre-built version to `wsmoses/598ape` on Dockerhub.
+You can build this yourself manually by running `cd docker && docker build -t <myusername>/598ape .`. Alternatively we have pushed a pre-built version to `wsmoses/598ape` on Dockerhub.
 
-You can then use the Docker container to build and run your code. If you run `./dockerrun.sh` you will enter an interactive bash session with all the packages from docker installed (that script by default uses `wsmoses/598ape`, feel free to replace it with whatever location you like if you built from scratch). The current directory (aka this folder) is mounted within `/host`. Any files you create on your personal machine will be available there, and anything you make in the container in that folder will be available on your personal machine.
+You can then use the Docker container to build and run your code.
+
+To start up the docker container,
+`docker run -it \
+  --cap-add=PERFMON \
+  --security-opt seccomp=unconfined \
+  -v "$PWD:/host" \
+  -w /host \
+  --name 598ape \
+  jrliu2/598ape`
+
+replacing jrliu2 with whatever your container is called.
+
+The first time you do this, inside the container, do `apt update` and `apt install linux-tools-7.0.0-31-generic`. You need this to run perf.
+
+The current directory (aka this folder) is mounted within `/host`. Any files you create on your personal machine will be available there, and anything you make in the container in that folder will be available on your personal machine.
