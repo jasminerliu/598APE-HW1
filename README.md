@@ -15,8 +15,8 @@ make clean
 ```
 
 To profile any run, you can do:
-`perf stat <command>`
-`perf record <command>`
+`perf stat -- <command>`
+`perf record -- <command>`
 `perf report`
 `perd report --stdio`
 
