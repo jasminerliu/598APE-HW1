@@ -35,6 +35,14 @@ make clean && make -j
 
 Our history has three checkpoint commits, each bundling one or more related optimizations. To isolate an individual optimization's effect, check out the commit before it changed, diff against the commit that introduced it (git diff [PARENT] [COMMIT] -- <file>), and re-benchmark before/after applying just that file's change.
 
+| Commit | Link | Optimizations included | Files changed | Root cause (from profiling) |
+|---|---|---|---|---|
+| Baseline | (repo root / earliest commit before the three below) | — | — | — |
+| `aef8813` | [fixed bottlenecks in calcColor and getIntersection](https://github.com/jasminerliu/598APE-HW1/commit/aef8813aab22f4c08c2bbe8e933ba590d885b5a) | (1) Removed O(N²) malloc/sort in `calcColor` — track the intersection minimum in a single linear scan instead of building and sorting a full array of every shape's hit time. (2) Early-exit in `Box::getIntersection` before calling `solveScalers` when the ray misses the plane. | `src/shape.cpp` (calcColor), `src/box.cpp` (Box::getIntersection) | `calcColor`'s per-ray malloc/free churn was ~99.8% of profiler frame; `Box::getIntersection` was calling the (then-expensive) `solveScalers` even on rays that already missed |
+| `db5249b` | [changed solveScalers](https://github.com/jasminerliu/598APE-HW1/commit/db5249be79d856f2c55504eebe3723911ae12e1) | (3) Replaced `solveScalers`'s general 3x3 solve with a dot-product projection, exploiting that every caller passes an orthonormal basis (`right, up, vect` — rotation matrix columns). Verified numerically before applying — see `scripts/verify_orthonormal.py`. | `src/vector.cpp` (`solveScalers`) | `solveScalers` was 18.89% self-time in `perf report`, the top self-time entry at that point — 3 divisions + a full determinant solve reduced to 3 multiply-adds |
+| `62e31ef` | [parallelized refresh + added compiler flags](https://github.com/jasminerliu/598APE-HW1/commit/62e31ef05231158766760198bda50de78bd3fb7) | (4) Parallelized the top-level pixel loop (`refresh()`) with OpenMP (`#pragma omp parallel for schedule(dynamic)`). (5) Added `-march=native` to build flags. (6) Added `-fopenmp` (required for the OpenMP pragma to take effect). | `main.cpp` (`refresh()`), `Makefile` (`FLAGS`) | `refresh()`'s per-pixel loop was single-threaded despite being embarrassingly parallel (each pixel writes a disjoint slice of the output buffer and only reads shared, unmutated scene state); `perf stat` confirmed ~3.9 CPUs utilized post-change with negligible OpenMP overhead (~0.70% self-time in the wrapped frame) |
+
+
 ### After calcColor + Box::getIntersection fixes
 ```bash
 git checkout aef8813
